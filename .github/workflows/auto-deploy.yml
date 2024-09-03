@@ -79,4 +79,4 @@ jobs:
           --deployment-group-name ${{ secrets.CODE_DEPLOY_GROUP_NAME }} \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --description "Deploying Docker image to EC2" \
-          --s3-location bucket=${{ secrets.S3_BUCKET }} key=${{ env.S3_KEY }} bundleType=zip
+          --s3-location bucket=${{ secrets.S3_BUCKET }},key=${{ env.S3_KEY }},bundleType=zip
