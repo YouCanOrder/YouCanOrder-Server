@@ -1,0 +1,54 @@
+name: Auto Deploy to EC2
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+          docker login --username AWS \
+          --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+      - name: Copy application-*.yml
+        run: |
+          touch ./src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+          
+      - name: Build and tag Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_TAG }}:${{ env.IMAGE_TAG }} .
+
+      - name: Push Docker image to Amazon ECR
+        run: |
+          docker push ${{ secrets.DOCKER_TAG }}:${{ env.IMAGE_TAG }}
+
+      - name: Deploy to EC2 with CodeDeploy
+        run: |
+          aws deploy create-deployment \
+          --application-name ${{ secrets.CODE_DEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ secrets.CODE_DEPLOY_GROUP_NAME }} \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --description "Deploying Docker image to EC2"
+          --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
