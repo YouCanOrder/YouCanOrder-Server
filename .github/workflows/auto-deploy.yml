@@ -29,7 +29,7 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
           docker login --username AWS \
-          --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+          --password-stdin ${{ secrets.ECR_URI }}
 
       - name: Copy application-*.yml
         run: |
@@ -38,11 +38,13 @@ jobs:
           
       - name: Build and tag Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_TAG }}:${{ env.IMAGE_TAG }} .
+          docker build -t ${{ secrets.DOCKER_TAG }}:${{ env.IMAGE_TAG }} \
+          -t ${{ secrets.DOCKER_TAG }}:latest .
 
       - name: Push Docker image to Amazon ECR
         run: |
           docker push ${{ secrets.DOCKER_TAG }}:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.DOCKER_TAG }}:latest
 
       - name: Deploy to EC2 with CodeDeploy
         run: |
@@ -51,4 +53,3 @@ jobs:
           --deployment-group-name ${{ secrets.CODE_DEPLOY_GROUP_NAME }} \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --description "Deploying Docker image to EC2"
-          --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
