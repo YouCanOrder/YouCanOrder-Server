@@ -44,11 +44,6 @@ jobs:
           docker login --username AWS \
           --password-stdin ${{ secrets.ECR_URI }}
 
-      - name: Copy application-*.yml
-        run: |
-          touch ./src/main/resources/application.yml
-          echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
-          
       - name: Build and tag Docker image
         run: |
           docker build \
