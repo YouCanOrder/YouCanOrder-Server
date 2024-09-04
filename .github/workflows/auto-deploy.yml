@@ -48,6 +48,11 @@ jobs:
         run: |
           touch ./src/main/resources/application.yml
           echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+
+      - name: Verify application.yml
+        run: |
+          echo "Contents of application.yml:"
+          cat ./src/main/resources/application.yml
           
       - name: Build and tag Docker image
         run: |
