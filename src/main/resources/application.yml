@@ -1,0 +1,13 @@
+# application.yml
+
+spring:
+  config:
+    import: aws-parameterstore:/youcanorder/
+
+management:
+  server:
+    port: ${ACTUATOR_PORT}
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_EXPOSURE}
