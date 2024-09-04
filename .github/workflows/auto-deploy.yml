@@ -51,13 +51,14 @@ jobs:
           
       - name: Build and tag Docker image
         run: |
-          docker build -t youcanorder-server:${{ env.IMAGE_TAG }} \
-          -t youcanorder-server:latest .
+          docker build \
+          -t ${{ secrets.ECR_URI }}/youcanorder-server:${{ env.IMAGE_TAG }} \
+          -t ${{ secrets.ECR_URI }}/youcanorder-server:latest .
 
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push youcanorder-server:${{ env.IMAGE_TAG }}
-          docker push youcanorder-server:latest
+          docker push ${{ secrets.ECR_URI }}/youcanorder-server:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ECR_URI }}/youcanorder-server:latest
 
       - name: Deploy to EC2 with CodeDeploy
         run: |
