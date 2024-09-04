@@ -67,4 +67,4 @@ jobs:
           --deployment-group-name youcanorder-code-deploy-group \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --description "Deploying Docker image to EC2" \
-          --s3-location bucket=${{ secrets.S3_BUCKET }},key=${{ secrets.S3_KEY }},bundleType=YAML
+          --s3-location bucket=${{ secrets.S3_BUCKET }},key=${{ secrets.S3_KEY }},bundleType=zip
